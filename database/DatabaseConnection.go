@@ -10,6 +10,13 @@ import (
 	util "ECommerce-Backend/utils"
 )
 
+func OpenCollection(client* mongo.Client,collectionName string)*mongo.Collection{
+	var collection *mongo.Collection = client.Database("Ecommerce").Collection(collectionName);
+	return collection;
+}
+
+var Client *mongo.Client = DBinstance();
+
 func DBinstance() *mongo.Client{
 	connectionUrl := "mongodb://localhost:27017";
 	fmt.Println(connectionUrl);

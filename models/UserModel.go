@@ -17,5 +17,7 @@ type User struct {
 	Password	 string 				`json:"password" validate:"required,max=10,min=3"`
 	Created_at 	time.Time				`json:"created_at"`
 	Updated_at	time.Time				`json:"updated_at"`
-	
+	Token 			*string				`json:"token"`
+	Refresh_token	*string				`json:"refresh_token"`
+	Role			string				`json:"role" validate:"required,eq=user|eq=admin"`
 }	
