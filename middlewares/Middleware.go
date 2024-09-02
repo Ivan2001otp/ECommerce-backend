@@ -4,8 +4,10 @@ import (
 	helper "ECommerce-Backend/helper"
 	utils "ECommerce-Backend/utils"
 	"net/http"
-	"golang.org/x/time/rate"
+	"time"
+
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 )
 
 func RateLimitMiddleWare(limiter *rate.Limiter)gin.HandlerFunc{
@@ -43,13 +45,30 @@ func Authenticate() gin.HandlerFunc{
 	return func (c *gin.Context)  {
 		clientToken := c.Request.Header.Get("token")
 
-		if clientToken==""{
-			c.JSON(http.StatusInternalServerError,gin.H{"error":"No Authorization header provided!"});
-			c.Abort();
-			return;
-		}
+		
+
+		// if cookieErr!=nil{
+		// 	utils.LogMessage(cookieErr.Error());
+		// 	c.JSON(http.StatusInternalServerError,gin.H{"error":"No Authorization header provided!"});
+		// 	c.Abort();
+		// 	return;
+		// }
+		// if clientToken==""{
+		// 	c.JSON(http.StatusInternalServerError,gin.H{"error":"No Authorization header provided!"});
+		// 	c.Abort();
+		// 	return;
+		// }
+
+		
+		
 
 		claims,err := helper.ValidateToken(clientToken);
+
+		if claims.ExpiresAt < time.Now().Unix(){
+			utils.LogMessage("Token is expired!");
+			c.AbortWithStatus(http.StatusUnauthorized);
+			return;
+		}
 
 		if err!=""{
 			utils.LogMessage("Something went wrong while authenticating!");
@@ -57,6 +76,22 @@ func Authenticate() gin.HandlerFunc{
 			c.Abort();
 			return;
 		}
+
+		origin := c.Request.Header.Get("Origin");
+		referer := c.Request.Header.Get("Referer");
+
+		if origin!="" && origin!=c.Request.Host && referer!="" && referer!=c.Request.Host{
+			utils.LogMessage("something wrong with origin and referer!");
+			c.AbortWithStatus(http.StatusForbidden);
+			return;
+		}
+
+		// xsrfHeader := c.Request.Header.Get("X-XSRF-TOKEN");
+		
+		// if xsrfHeader!="" && xsrfHeader!=claims.{
+		// 	c.AbortWithStatus(http.StatusForbidden);
+		// 	return;
+		// }
 
 		c.Set("email",claims.Email);
 		c.Set("first_name",claims.First_name);

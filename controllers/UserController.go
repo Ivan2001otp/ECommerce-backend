@@ -22,6 +22,7 @@ var userCollection = database.OpenCollection(database.Client, "user")
 
 func GetUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		utils.LogMessage("3");
 
 		err:= helper.CheckUserType(c,"admin");
 		if err!=nil{
@@ -59,7 +60,7 @@ func GetUsers() gin.HandlerFunc {
 		
 		groupStage := bson.D{
 			{
-				"$group",bson.D{
+				Key: "$group",Value: bson.D{
 					{"_id",bson.D{{"_id","null"}}},
 					{"total_count",bson.D{{"$sum",1}}},
 					{"data",bson.D{{"$push","$$ROOT"}}},
@@ -146,7 +147,7 @@ func SignUp() gin.HandlerFunc {
 			return
 		}
 
-		phoneNumCount, err := userCollection.CountDocuments(ctx, bson.M{"phone_number": *user.Phone})
+		phoneNumCount, err := userCollection.CountDocuments(ctx, bson.M{"phone": *user.Phone})
 
 		if err != nil {
 			defer cancel()
@@ -174,6 +175,30 @@ func SignUp() gin.HandlerFunc {
 		user.Token = &token
 		user.Refresh_token = &refreshToken
 
+
+		//store in https cookie the jwt token
+		csrfToken,err1 := helper.GenerateCSRFtoken();
+		
+		if err1!=nil{
+			c.AbortWithStatus(http.StatusUnauthorized);
+			return;
+		}	
+
+		//jwt token stored.
+		c.SetCookie(
+			"jwt-token",
+			token,
+			24*60*60,//24hrs
+			"",
+			"",
+			true,
+			true,
+		)
+
+		c.SetSameSite(http.SameSiteLaxMode)
+		//csrf token stored.
+		c.SetCookie("XSRF-TOKEN",csrfToken,24*60*60,"","",true,true);
+
 		result, err := userCollection.InsertOne(ctx, user)
 
 		if err != nil {
@@ -200,7 +225,11 @@ func Login() gin.HandlerFunc {
 			utils.LogMessage("Something went wrong ->" + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
+
 		}
+
+		
+		
 
 		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
 

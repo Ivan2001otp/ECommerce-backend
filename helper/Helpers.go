@@ -13,6 +13,8 @@ import (
 	"context"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"crypto/rand"
+    "encoding/base64"
 
 )
 
@@ -30,6 +32,20 @@ type SignedDetails struct{
 
 var userCollection *mongo.Collection = database.OpenCollection(database.Client,"user");
 
+
+func GenerateCSRFtoken()(string,error){
+	b:=make([]byte,32);//32bytes
+	_,err :=rand.Read(b);
+
+
+	if err!=nil{
+		return "",err;
+	}
+
+	token := base64.URLEncoding.EncodeToString(b);
+
+	return token,nil;
+}
 
 func HashPassword(password string) string{
 	bytes,err := bcrypt.GenerateFromPassword([]byte(password),14);
