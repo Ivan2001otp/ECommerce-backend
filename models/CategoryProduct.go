@@ -8,9 +8,9 @@ import (
 
 type ProductCategory struct {
 	ID 					primitive.ObjectID		`bson:"_id"`
-	Category_id			string					`json:"category_id" validate:"required"`
-	Name				string					`json:"name"`
+	Category_id			string					`json:"category_id"`
+	Name				string					`json:"name" validate:"required"`
 	Created_at			time.Time				`json:"created_at"`
 	Updated_at			time.Time				`json:"updated_at"`
-	Category 			string					`json:"category"`
+	Category 			string					`json:"category" validate:"required"`
 }

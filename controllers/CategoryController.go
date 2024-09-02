@@ -66,11 +66,11 @@ func AddCategory() gin.HandlerFunc{
 func GetAllCategory() gin.HandlerFunc{
 	return func(c *gin.Context) {
 		var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second);
-		defer cancel();
 
 		result,err := categoryCollection.Find(context.TODO(),bson.M{});
 
 		if err!=nil{
+			defer cancel();
 			utils.LogMessage("Failed to fetch all categories");
 			c.JSON(http.StatusInternalServerError,gin.H{"error":err.Error()});
 			return;
@@ -79,10 +79,13 @@ func GetAllCategory() gin.HandlerFunc{
 		var allCategories []bson.M;
 
 		if err=result.All(ctx,&allCategories);err!=nil{
-			utils.LogMessage("all-Categories threw error!");
+			defer cancel();
+			utils.LogMessage("Get-All-Categories threw error!");
 			c.JSON(http.StatusInternalServerError,gin.H{"error":err.Error()});
 			return;
 		}
+
+		defer cancel();
 
 		c.JSON(http.StatusOK,allCategories);
 
@@ -106,6 +109,7 @@ func GetCategoryById() gin.HandlerFunc{
 				return;
 			}
 
+			defer cancel();
 			c.JSON(http.StatusOK,productCategory);
 
 	}
@@ -165,6 +169,7 @@ func UpdateCategoryById() gin.HandlerFunc{
 				return;
 			}
 
+			defer cancel();
 			c.JSON(http.StatusOK,result);
 
 	}

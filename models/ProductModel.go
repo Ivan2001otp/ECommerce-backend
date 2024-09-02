@@ -8,6 +8,7 @@ import (
 
 type Product struct {
 	ID 					primitive.ObjectID 			`bson:"_id"`
+	Product_id			string						`json:"product_id"`
 	Category_id			*string						`json:"category_id" validate:"required"`
 	Product_name		string						`json:"product_name" validate:"required,max=100,min=2"`
 	Description			string						`json:"description"  validate:"required,max=256"`

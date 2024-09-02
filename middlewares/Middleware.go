@@ -53,11 +53,11 @@ func Authenticate() gin.HandlerFunc{
 		// 	c.Abort();
 		// 	return;
 		// }
-		// if clientToken==""{
-		// 	c.JSON(http.StatusInternalServerError,gin.H{"error":"No Authorization header provided!"});
-		// 	c.Abort();
-		// 	return;
-		// }
+		if clientToken==""{
+			c.JSON(http.StatusInternalServerError,gin.H{"error":"No Authorization header provided!"});
+			c.Abort();
+			return;
+		}
 
 		
 		
