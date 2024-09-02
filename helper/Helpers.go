@@ -3,8 +3,17 @@ package helper
 import (
 	database "ECommerce-Backend/database"
 	"ECommerce-Backend/utils"
-
+	"time"
 	jwt "github.com/dgrijalva/jwt-go"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"context"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+
 )
 
 
@@ -15,20 +24,49 @@ type SignedDetails struct{
 	First_name string
 	Last_name string
 	Uid string
+	User_role string
 	jwt.StandardClaims
 }
 
 var userCollection *mongo.Collection = database.OpenCollection(database.Client,"user");
 
-func GenerateAllTokens(email string ,first_name string ,last_name string, user_type string,uid string)(signedToken string,refreshToken string,err Error){
+
+func HashPassword(password string) string{
+	bytes,err := bcrypt.GenerateFromPassword([]byte(password),14);
+	if err!=nil{
+		utils.LogMessage("hashing went wrong !");
+		log.Panic(err);
+		return "";
+	}
+
+	return string(bytes);
+}
+
+func VerifyPassword(userPassword string,providedPassword string)(bool,error){
+	err := bcrypt.CompareHashAndPassword([]byte(providedPassword),[]byte(userPassword));
+
+	check:=true;
+
+	if err!=nil{
+		msg := fmt.Sprintf("Login email or password is incorrect!")
+		check =false;
+		utils.LogMessage(err.Error()+"->"+msg);
+		return check,err;
+	}
+
+	return check,nil;
+}
+
+func GenerateAllTokens(email string ,first_name string ,last_name string, user_type string,uid string)(signedToken string,refreshToken string,err error){
 	claims := &SignedDetails{
 		Email:email,
 		First_name:first_name,
 		Last_name:last_name,
 		Uid:uid,
+		User_role:user_type,
 		StandardClaims:jwt.StandardClaims{
 			//ideal expiration should be kept not more than 30mins.
-			ExpiresAt:time.Now().Local().Add(time.Hour*time.Duration(24)).Unix()
+			ExpiresAt:time.Now().Local().Add(time.Hour*time.Duration(24)).Unix(),
 		},
 	}
 
@@ -46,7 +84,7 @@ func GenerateAllTokens(email string ,first_name string ,last_name string, user_t
 		return;
 	}
 
-	refresh_token,err2 := jwt.NewWithClaims(jwt.SigningMethodHS256,claims).SignedString([]byte(SECRET_KEY));
+	refresh_token,err2 := jwt.NewWithClaims(jwt.SigningMethodHS256,refresh_claims).SignedString([]byte(SECRET_KEY));
 	if err2!=nil{
 		utils.LogMessage("Something went wrong while generating  refresh tokens")
 		log.Panic(err2);
@@ -65,19 +103,19 @@ func UpdateAllTokens(signedToken string,signedRefreshToken string,userId string)
 	updateObj = append(updateObj,bson.E{"updated_at",Updated_at});
 	upsert := true;
 
-	filter := bson.M{"user_id",userId};
+	filter := bson.M{"user_id":userId};
 
 	option := options.UpdateOptions{
 		Upsert:&upsert,
 	}
 
-	_,err := userCollection.UpdateOne{
+	_,err := userCollection.UpdateOne(
 		ctx,filter,
 		bson.D{
 			{"$set",updateObj},
 		},
 		&option,
-	}
+	)
 
 	defer cancel();
 

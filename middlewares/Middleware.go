@@ -23,6 +23,8 @@ func Authorize(roles ...string) gin.HandlerFunc{
 	return func(c *gin.Context){
 		role,exists := c.Get("role");
 
+		utils.LogMessage("Role is ");
+		utils.LogMessage(role)
 		if !exists{
 			c.JSON(http.StatusUnauthorized,gin.H{"error":"Unauthorized"});
 			return;
@@ -60,6 +62,7 @@ func Authenticate() gin.HandlerFunc{
 		c.Set("first_name",claims.First_name);
 		c.Set("last_name",claims.Last_name);
 		c.Set("uid",claims.Uid);
+		c.Set("role",claims.User_role);
 		c.Next();
 	}
 }
