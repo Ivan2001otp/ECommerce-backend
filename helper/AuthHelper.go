@@ -8,7 +8,8 @@ import (
 
 func CheckUserType(c *gin.Context,role string)(err error){
 	userType := c.GetString("role")
-	utils.LogMessage(c);
+	
+	utils.LogMessage(c.Keys);
 	
 	err = nil;
 
@@ -16,7 +17,6 @@ func CheckUserType(c *gin.Context,role string)(err error){
 		utils.LogMessage("The user Type is empty !");
 	}else{
 		utils.LogMessage("The user Type is not empty !");
-
 	}
 
 	utils.LogMessage("The role is "+userType);

@@ -20,9 +20,7 @@ func AdminRoutes(incomingRoutes *gin.Engine) {
 		controller.GetUsers(),
 	)
 
-	//need to implement.
-	incomingRoutes.GET("/admin/all-order",middleware.RateLimitMiddleWare(rateLimiter),controller.FetchAllOrders())
-
+	
 	//product ops
 	incomingRoutes.POST("/admin/product/add",
 		middleware.RateLimitMiddleWare(rateLimiter),

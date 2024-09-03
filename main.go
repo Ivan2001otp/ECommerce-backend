@@ -15,6 +15,7 @@ func main(){
 
 	routes.AuthRoutes(router);
 	routes.AdminRoutes(router);
+	routes.UserRoute(router);
 
 	router.Run(":"+port);
 }

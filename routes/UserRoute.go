@@ -8,9 +8,16 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func UserRoute(incomingRoutes *gin.Engine){
-	rateLimiter := rate.NewLimiter(5,10);
+func UserRoute(incomingRoutes *gin.Engine) {
+	rateLimiter := rate.NewLimiter(5, 10)
 
-	incomingRoutes.POST("/order/:user_id",middleware.RateLimitMiddleWare(rateLimiter),controller.CreateOrder());
-	incomingRoutes.GET("/order")
+	// checks authorization.
+	incomingRoutes.Use(middleware.Authenticate())
+
+	incomingRoutes.POST("/order/:user_id", middleware.RateLimitMiddleWare(rateLimiter), controller.CreateOrder())
+	incomingRoutes.GET("/order/:order_id", middleware.RateLimitMiddleWare(rateLimiter), controller.FetchOrderById())
+
+	incomingRoutes.GET("/admin/orders",
+	middleware.RateLimitMiddleWare(rateLimiter),controller.FetchAllOrders())
+
 }
