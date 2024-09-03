@@ -15,6 +15,8 @@ type Order struct {
 	Payment_mode		*string					`json:"payment_mode" validate:"eq=CARD|eq=CASH|eq="`
 	Payment_status		*string					`json:"payment_status" validate:"required,eq=PENDING|eq=PAID"`
 	Ordered_products	[]map[Product]int		`json:"ordered_products"`
+	Total_price			float64					`json:"total_price"`
+	Order_status		string					`json:"ordered_status" valdiate:"eq=REACHED|eq=INPROGRESS"`
 	Created_at			time.Time				`json:"created_at"`
 	Updated_at			time.Time				`json:"updated_at"`
 }

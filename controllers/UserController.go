@@ -22,7 +22,7 @@ var userCollection = database.OpenCollection(database.Client, "user")
 
 func GetUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		utils.LogMessage("3");
+		
 
 		err:= helper.CheckUserType(c,"admin");
 		if err!=nil{

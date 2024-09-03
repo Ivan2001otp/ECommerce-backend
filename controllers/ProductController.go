@@ -4,6 +4,7 @@ import (
 	database "ECommerce-Backend/database"
 	models "ECommerce-Backend/models"
 	utils "ECommerce-Backend/utils"
+	helper "ECommerce-Backend/helper"
 	"context"
 	"net/http"
 	"strconv"
@@ -24,6 +25,13 @@ var productCollection *mongo.Collection = database.OpenCollection(database.Clien
 
 func AddProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		err1:= helper.CheckUserType(c,"admin");
+		if err1!=nil{
+			c.JSON(http.StatusBadRequest,gin.H{"error":"Cannot access /getusers endpoint because u are not admin!"});
+			return;
+		}
+
 		var product models.Product
 		var belongedCategory models.ProductCategory
 
@@ -84,6 +92,12 @@ func AddProduct() gin.HandlerFunc {
 
 func GetProductById() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		err1:= helper.CheckUserType(c,"admin");
+		if err1!=nil{
+			c.JSON(http.StatusBadRequest,gin.H{"error":"Cannot access /getusers endpoint because u are not admin!"});
+			return;
+		}
+
 		productId := c.Param("product_id")
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
@@ -106,6 +120,13 @@ func GetProductById() gin.HandlerFunc {
 
 func GetAllProducts() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		err1:= helper.CheckUserType(c,"admin");
+		if err1!=nil{
+			c.JSON(http.StatusBadRequest,gin.H{"error":"Cannot access /getusers endpoint because u are not admin!"});
+			return;
+		}
+
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
@@ -184,6 +205,12 @@ func GetAllProducts() gin.HandlerFunc {
 
 func UpdateProductById() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		err1:= helper.CheckUserType(c,"admin");
+		if err1!=nil{
+			c.JSON(http.StatusBadRequest,gin.H{"error":"Cannot access /getusers endpoint because u are not admin!"});
+			return;
+		}
+
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		product_id := c.Param("product_id")
 
