@@ -62,7 +62,6 @@ func CreateOrder() gin.HandlerFunc {
 
 		fmt.Println(total_price)
 		order.Total_price = &total_price
-		utils.LogMessage("1121")
 
 		result, err := orderCollection.InsertOne(ctx, order)
 		defer cancel()

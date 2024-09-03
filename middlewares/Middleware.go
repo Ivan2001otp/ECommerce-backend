@@ -4,6 +4,7 @@ import (
 	helper "ECommerce-Backend/helper"
 	utils "ECommerce-Backend/utils"
 	"log"
+	"time"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -61,7 +62,7 @@ func Authenticate() gin.HandlerFunc {
 			return;
 		}
 
-/*
+
 		if claims.ExpiresAt < time.Now().Unix() {
 			utils.LogMessage("11");
 			utils.LogMessage("Token is expired!")
@@ -89,7 +90,7 @@ func Authenticate() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
-*/
+
 		
 
 		c.Set("email", claims.Email)
